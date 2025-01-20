@@ -27,12 +27,14 @@ interface ApiService {
     @GET("users/{user_id}/posts/")
     suspend fun getPosts(@Path("user_id") userId: Int): List<Post>
 
-    @PUT("posts/{post_id}")
+    @PUT("posts/{post_id}/")
     suspend fun updatePost(
-        @Path("post_id") postInt: Int,
+        @Path("post_id") postId: Int,
         @Body post: CreatePostRequest
     ): Post
 
-    @DELETE("posts/{post_id}")
-    suspend fun deletePost(@Path("post_id") postId: Int): Unit
+    @DELETE("posts/{post_id}/")
+    suspend fun deletePost(
+        @Path("post_id") postId: Int
+    ): Unit
 }

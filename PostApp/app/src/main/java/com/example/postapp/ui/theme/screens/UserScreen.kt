@@ -11,9 +11,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -26,9 +28,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.postapp.viewmodel.PostViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 
 @Composable
-fun UserScreen(viewModel: PostViewModel = viewModel()) {
+fun UserScreen(viewModel: PostViewModel = viewModel(), navController: NavHostController) {
     var name by remember { mutableStateOf("")  }
     var email by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -49,7 +52,14 @@ fun UserScreen(viewModel: PostViewModel = viewModel()) {
             value = name,
             onValueChange = { name = it },
             label = { Text(text = "Nome") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = MaterialTheme.colors.surface, // Cor de fundo adaptável ao tema
+                focusedIndicatorColor = MaterialTheme.colors.primary, // Cor do indicador quando em foco
+                unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled), // Cor do indicador quando fora de foco
+                textColor = MaterialTheme.colors.onSurface, // Cor do texto
+                cursorColor = MaterialTheme.colors.primary // Cor do cursor
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -58,27 +68,43 @@ fun UserScreen(viewModel: PostViewModel = viewModel()) {
             value = email,
             onValueChange = { email = it },
             label = { Text(text = "Email") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = MaterialTheme.colors.surface, // Cor de fundo adaptável ao tema
+                focusedIndicatorColor = MaterialTheme.colors.primary, // Cor do indicador quando em foco
+                unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled), // Cor do indicador quando fora de foco
+                textColor = MaterialTheme.colors.onSurface, // Cor do texto
+                cursorColor = MaterialTheme.colors.primary // Cor do cursor
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = {
-                isLoading = true
-                viewModel.createUser(
-                    name,
-                    email,
-                    onSuccess = {
-                        Toast.makeText(context, "Usuário criado com sucesso", Toast.LENGTH_SHORT).show()
-                        isLoading = false
-                    },
-                    onError = {
-                        Toast.makeText(context, "Erro ao criar o usuário", Toast.LENGTH_SHORT).show()
-                    }
-                )
-                name = ""
-                email = ""
+                if (name.isBlank() || email.isBlank()) {
+                    Toast.makeText(context, "Nome e email não podem estar vazios", Toast.LENGTH_SHORT).show()
+                } else {
+                    isLoading = true
+                    viewModel.createUser(
+                        name,
+                        email,
+                        onSuccess = {
+                            Toast.makeText(
+                                context,
+                                "Usuário criado com sucesso",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            isLoading = false
+                        },
+                        onError = {
+                            Toast.makeText(context, "Erro ao criar o usuário", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    )
+                    name = ""
+                    email = ""
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {

@@ -10,12 +10,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
-import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,10 +29,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.postapp.viewmodel.PostViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.example.postapp.data.models.Post
 
 @Composable
-fun PostScreen(viewModel: PostViewModel = viewModel()) {
+fun PostScreen(viewModel: PostViewModel = viewModel(), navController: NavHostController) {
     var title by remember { mutableStateOf("")  }
     var content by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
@@ -53,7 +55,14 @@ fun PostScreen(viewModel: PostViewModel = viewModel()) {
             value = title,
             onValueChange = { title = it },
             label = { Text(text = "Título") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = MaterialTheme.colors.surface, // Cor de fundo adaptável ao tema
+                focusedIndicatorColor = MaterialTheme.colors.primary, // Cor do indicador quando em foco
+                unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled), // Cor do indicador quando fora de foco
+                textColor = MaterialTheme.colors.onSurface, // Cor do texto
+                cursorColor = MaterialTheme.colors.primary // Cor do cursor
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -62,27 +71,43 @@ fun PostScreen(viewModel: PostViewModel = viewModel()) {
             value = content,
             onValueChange = { content = it },
             label = { Text(text = "Conteúdo") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = MaterialTheme.colors.surface, // Cor de fundo adaptável ao tema
+                focusedIndicatorColor = MaterialTheme.colors.primary, // Cor do indicador quando em foco
+                unfocusedIndicatorColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled), // Cor do indicador quando fora de foco
+                textColor = MaterialTheme.colors.onSurface, // Cor do texto
+                cursorColor = MaterialTheme.colors.primary // Cor do cursor
+            )
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         Button(
             onClick = {
-                isLoading = true
-                viewModel.createPost(
-                    title,
-                    content,
-                    onSuccess = {
-                        Toast.makeText(context, "Postagem criada com sucesso", Toast.LENGTH_SHORT).show()
-                        isLoading = false
-                    },
-                    onError = {
-                        Toast.makeText(context, "Erro ao criar a postagem", Toast.LENGTH_SHORT).show()
-                    }
-                )
-                title = ""
-                content = ""
+                if (title.isBlank() || content.isBlank()) {
+                    Toast.makeText(context, "Título e conteúdo não podem estar vazios", Toast.LENGTH_SHORT).show()
+                } else {
+                    isLoading = true
+                    viewModel.createPost(
+                        title,
+                        content,
+                        onSuccess = {
+                            Toast.makeText(
+                                context,
+                                "Postagem criada com sucesso",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            isLoading = false
+                        },
+                        onError = {
+                            Toast.makeText(context, "Erro ao criar a postagem", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    )
+                    title = ""
+                    content = ""
+                }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -121,7 +146,7 @@ fun PostScreen(viewModel: PostViewModel = viewModel()) {
 
                         TextField(
                             value = editingPost!!.content,
-                            onValueChange = {newContent -> editingPost = editingPost!!.copy(title = newContent)},
+                            onValueChange = {newContent -> editingPost = editingPost!!.copy(content = newContent)},
                             label = { Text(text = "Conteúdo") }
                         )
                     }

@@ -1,10 +1,14 @@
 package com.example.postapp.viewmodel
 
+import android.widget.Toast
+import androidx.annotation.OptIn
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.util.Log
+import androidx.media3.common.util.UnstableApi
 import com.example.postapp.data.RetrofitInstance
 import com.example.postapp.data.models.CreatePostRequest
 import com.example.postapp.data.models.Post
@@ -43,6 +47,13 @@ class PostViewModel: ViewModel() {
         onSuccess: () -> Unit,
         onError: () -> Unit
     ) {
+        // Verifica se os campos estão vazios ou nulos
+        if (name.isBlank() || email.isBlank()) {
+            // Caso algum campo esteja vazio, chama a função de erro
+            onError()
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val newUser = UserCreateRequest(name, email)
@@ -62,6 +73,13 @@ class PostViewModel: ViewModel() {
         onSuccess: () -> Unit,
         onError: () -> Unit
     ) {
+        // Verifica se os campos estão vazios ou nulos
+        if (title.isBlank() || content.isBlank()) {
+            // Caso algum campo esteja vazio, chama a função de erro
+            onError()
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val newPost = CreatePostRequest(title, content)
@@ -75,25 +93,36 @@ class PostViewModel: ViewModel() {
         }
     }
 
+    @OptIn(UnstableApi::class)
     fun deletePost(postId: Int) {
         viewModelScope.launch {
             try {
                 RetrofitInstance.api.deletePost(postId)
                 fetchPosts()
+                Log.d("PostViewModel", "Post $postId deletado com sucesso")
             } catch (e: Exception) {
                 e.printStackTrace()
+                Log.e("PostViewModel", "Erro ao deletar o post $postId: ${e.message}")
             }
         }
     }
 
+    @OptIn(UnstableApi::class)
     fun updatePost(postId: Int, title: String, content: String) {
+        // Verifica se os campos estão vazios ou nulos
+        if (title.isBlank() || content.isBlank()) {
+            return
+        }
+
         viewModelScope.launch {
             try {
                 val updatePost = CreatePostRequest(title, content)
                 RetrofitInstance.api.updatePost(postId, updatePost)
                 fetchPosts()
+                Log.d("PostViewModel", "Post $postId atualizado com sucesso")
             } catch (e: Exception) {
                 e.printStackTrace()
+                Log.e("PostViewModel", "Erro ao atualizar o post $postId: ${e.message}")
             }
         }
     }

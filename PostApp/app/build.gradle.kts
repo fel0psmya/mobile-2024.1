@@ -66,6 +66,10 @@ dependencies {
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.45")
+    implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.navigation.runtime.ktx)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.media3.common.ktx)
     kapt("com.google.dagger:hilt-android-compiler:2.45")
 
     // Lifecycle
